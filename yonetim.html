@@ -97,6 +97,7 @@ tr.tik{cursor:pointer}tr.tik:hover td{background:var(--kart2)}
 <script>
 "use strict";
 const ADRES = "https://jbhwwpncbhiixrcsoomd.supabase.co";
+const KURUCU = "camurlurota.destek@gmail.com";
 const ANAHTAR = "sb_publishable_uYKIQAumIOWZXYkYRVL7wQ_Ozp0-W0k";   // herkese açık anahtar; yetki veritabanındaki yönetici kuralından gelir
 let oturum = JSON.parse(localStorage.getItem("camu_yonetim") || "null");
 let bolum = "genel", yenileZamanlayici = null;
@@ -175,7 +176,7 @@ function cikisYap(){ oturum = null; localStorage.removeItem("camu_yonetim"); cle
 
 function basla(){
   $("#giris").style.display = "none"; $("#uygulama").style.display = "block";
-  $("#kim").textContent = (oturum.eposta || "") + (oturum.rol === "sahip" ? " · Sahip" : " · Yönetici");
+  $("#kim").textContent = (oturum.eposta || "") + (oturum.eposta === KURUCU ? " · Kurucu" : oturum.rol === "sahip" ? " · Tam yetki" : " · Yönetici");
   git(bolum);
   clearInterval(yenileZamanlayici);
   yenileZamanlayici = setInterval(() => { rozetler(); if (["genel","sohbet","destek"].includes(bolum) && $("#modal").style.display !== "flex") git(bolum, true); }, 15000);
@@ -506,21 +507,35 @@ async function talepAc(t){
 // ---------- yöneticiler ----------
 async function yoneticiler(){
   const l = await rest("GET", "yoneticiler?select=id,eposta,rol,eklenme&order=eklenme.asc");
-  const sahip = oturum.rol === "sahip";
+  const sahip = oturum.rol === "sahip", kurucu = oturum.eposta === KURUCU;
   $("#icerik").innerHTML = `<h3>Yöneticiler</h3>
     ${sahip ? `<div class="kart"><h4>Yeni yönetici ekle</h4>
       <p class="soluk kucuk">1) Eklemek istediğin kişi bu panelin giriş ekranında <b>"Hesap oluştur"</b> ile kendi e-postası ve şifresiyle hesap açar (e-postasına gelen onay bağlantısına tıklar).<br>2) Sen o e-postayı aşağıya yazıp eklersin. Artık kendi şifresiyle panele girebilir.<br>Yöneticiler her şeyi yapabilir ama başka yönetici ekleyip çıkaramaz; bunu sadece sahip yapar.</p>
       <div class="satir"><input id="y_eposta" type="email" placeholder="ornek@gmail.com"><button class="ana" id="y_ekle" style="flex:0 0 auto">Yönetici Yap</button></div></div>`
-    : '<p class="soluk">Yönetici ekleyip çıkarmayı sadece panelin sahibi yapabilir.</p>'}
+    : '<p class="soluk">Yönetici ekleyip çıkarmayı sadece tam yetkili kişiler yapabilir.</p>'}
     <div class="kart" style="padding:0;overflow:auto"><table><thead><tr><th>E-posta</th><th>Rol</th><th>Eklenme</th><th></th></tr></thead><tbody>
-    ${l.map(y => `<tr><td>${esc(y.eposta || y.id)}${y.id === oturum.id ? ' <span class="soluk kucuk">(sen)</span>' : ""}</td><td>${y.rol === "sahip" ? '<span class="etiket s">Sahip</span>' : '<span class="etiket m">Yönetici</span>'}</td>
-      <td>${tarih(y.eklenme)}</td><td>${sahip && y.rol !== "sahip" ? `<button class="tehlike" data-c="${y.id}">Çıkar</button>` : ""}</td></tr>`).join("")}
-    </tbody></table></div>`;
+    ${l.map(y => { const kurucuSatir = y.eposta === KURUCU, ben = y.id === oturum.id;
+      let dugmeler = "";
+      if (sahip && !ben && !kurucuSatir) {
+        if (y.rol === "yonetici") dugmeler = `<button class="yesil" data-r="${y.id}" data-rol="sahip">Tam Yetki Ver</button> <button class="tehlike" data-c="${y.id}">Çıkar</button>`;
+        else if (kurucu) dugmeler = `<button data-r="${y.id}" data-rol="yonetici">Tam Yetkiyi Al</button> <button class="tehlike" data-c="${y.id}">Çıkar</button>`;
+      }
+      return `<tr><td>${esc(y.eposta || y.id)}${ben ? ' <span class="soluk kucuk">(sen)</span>' : ""}</td>
+      <td>${kurucuSatir ? '<span class="etiket s">Kurucu · Tam yetki</span>' : y.rol === "sahip" ? '<span class="etiket s">Tam yetki</span>' : '<span class="etiket m">Yönetici</span>'}</td>
+      <td>${tarih(y.eklenme)}</td><td>${dugmeler}</td></tr>`; }).join("")}
+    </tbody></table></div>
+    <p class="soluk kucuk"><b>Yönetici:</b> oyunu yönetir (ban, sohbet, destek, hediye, ayarlar) ama yönetici ekleyip çıkaramaz.<br>
+    <b>Tam yetki:</b> buna ek olarak yönetici ekler, çıkarır ve başkasına tam yetki verebilir.<br>
+    <b>Kurucu</b> (camurlurota.destek@gmail.com) hiçbir zaman çıkarılamaz; tam yetkili birinin yetkisini sadece kurucu alabilir.</p>`;
   if (sahip) {
     $("#y_ekle").onclick = async () => { const e = $("#y_eposta").value.trim(); if (!e) return;
       try { const r = await rpc("yonetim_yonetici_ekle", { e });
         if (r === "hesap_yok") return bildir("Bu e-postayla hesap yok. Kişi önce panelin giriş ekranından 'Hesap oluştur' ile hesap açmalı.", true);
         bildir(e + " artık yönetici"); git("yonetici"); } catch (x) { bildir(x.message, true); } };
+    document.querySelectorAll("[data-r]").forEach(b => b.onclick = async () => {
+      const ver = b.dataset.rol === "sahip";
+      if (!confirm(ver ? "Bu kişiye TAM YETKİ verilsin mi? Yönetici ekleyip çıkarabilecek." : "Bu kişinin tam yetkisi alınsın mı? Normal yönetici olarak kalacak.")) return;
+      try { await rpc("yonetim_rol_degistir", { hedef: b.dataset.r, yeni: b.dataset.rol }); bildir(ver ? "Tam yetki verildi" : "Tam yetki alındı"); git("yonetici"); } catch (x) { bildir(x.message, true); } });
     document.querySelectorAll("[data-c]").forEach(b => b.onclick = async () => { if (!confirm("Bu kişinin yöneticiliği kaldırılsın mı?")) return;
       try { await rpc("yonetim_yonetici_sil", { hedef: b.dataset.c }); bildir("Yönetici çıkarıldı"); git("yonetici"); } catch (x) { bildir(x.message, true); } });
   }
