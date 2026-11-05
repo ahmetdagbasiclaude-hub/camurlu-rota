@@ -75,6 +75,7 @@ tr.tik{cursor:pointer}tr.tik:hover td{background:var(--kart2)}
     <h2>ÇAMURLU ROTA</h2>
     <a data-s="genel">📊 Genel Bakış</a>
     <a data-s="oyuncular">👥 Oyuncular</a>
+    <a data-s="reklam">📺 Reklamlar</a>
     <a data-s="supheli">🚩 Hile Şüphesi <span class="rozet" id="r_supheli" hidden></span></a>
     <a data-s="banli">⛔ Banlılar</a>
     <a data-s="sohbet">💬 Sohbet</a>
@@ -191,7 +192,7 @@ function git(s, sessiz){
   bolum = s; document.querySelectorAll("aside a").forEach(a => a.classList.toggle("secili", a.dataset.s === s));
   if (!sessiz) $("#icerik").innerHTML = '<p class="soluk">Yükleniyor...</p>';
   ({ genel: genelBakis, oyuncular: () => oyuncular(""), supheli: () => oyuncular("suphe"), banli: () => oyuncular("banli"),
-     sohbet, sikayet: sikayetler, destek, duyuru: duyurular, hediye: hediyeler, ayar: ayarlar, silme: hesapSilme, yonetici: yoneticiler })[s]().catch(e => { $("#icerik").innerHTML = '<p style="color:var(--kirmizi)">' + esc(e.message) + "</p>"; });
+     reklam: reklamlar, sohbet, sikayet: sikayetler, destek, duyuru: duyurular, hediye: hediyeler, ayar: ayarlar, silme: hesapSilme, yonetici: yoneticiler })[s]().catch(e => { $("#icerik").innerHTML = '<p style="color:var(--kirmizi)">' + esc(e.message) + "</p>"; });
 }
 document.querySelectorAll("aside a").forEach(a => a.onclick = () => git(a.dataset.s));
 
@@ -417,6 +418,46 @@ async function hesapSilme(){
     document.querySelectorAll("#s_sonuc [data-o]").forEach(b => b.onclick = () => oyuncuAc(b.dataset.o));
     document.querySelectorAll("#s_sonuc [data-s]").forEach(b => b.onclick = () => hesapSilOnay(oyuncuOnbellek[b.dataset.s])); };
   $("#s_ara").onkeydown = e => { if (e.key === "Enter") $("#s_btn").click(); };
+}
+
+// ---------- reklamlar ----------
+let reklamDonem = "1";
+async function adlariGetir(idler){
+  const ad = {};
+  for (let i = 0; i < idler.length; i += 80) {
+    const parca = idler.slice(i, i + 80);
+    const l = await rest("GET", `oyuncular?id=in.(${parca.join(",")})&select=id,ad,seviye`);
+    l.forEach(o => ad[o.id] = o);
+  }
+  return ad;
+}
+async function reklamlar(){
+  const gun = +reklamDonem;
+  const sinir = gun ? (gun === 1 ? new Date(new Date().setHours(0, 0, 0, 0)) : new Date(Date.now() - gun * 86400000)).toISOString() : null;
+  const l = await rest("GET", `olaylar?tur=eq.reklam${sinir ? "&zaman=gte." + sinir : ""}&select=oyuncu,zaman,surum&order=zaman.desc&limit=10000`);
+  const kisi = {};
+  l.forEach(e => { const k = kisi[e.oyuncu] ||= { id: e.oyuncu, n: 0, son: e.zaman, ilk: e.zaman }; k.n++; k.ilk = e.zaman; });
+  const dizi = Object.values(kisi).sort((a, b) => b.n - a.n);
+  const ad = await adlariGetir(dizi.map(k => k.id));
+  const isim = id => ad[id] ? `<b>${esc(ad[id].ad)}</b> <span class="soluk kucuk">Sv ${ad[id].seviye}</span>` : '<span class="soluk">Misafir (profil açmamış)</span>';
+  const donemAdi = { "1": "Bugün", "7": "Son 7 gün", "30": "Son 30 gün", "0": "Tüm zamanlar" }[reklamDonem];
+  $("#icerik").innerHTML = `<h3>Reklamlar</h3>
+    <div class="arac"><select id="r_donem"><option value="1">Bugün</option><option value="7">Son 7 gün</option><option value="30">Son 30 gün</option><option value="0">Tüm zamanlar</option></select>
+      <span class="soluk kucuk">Sadece sonuna kadar izlenen (ödül verilen) reklamlar sayılır.</span></div>
+    <div class="izgara">
+      <div class="sayi"><span>${donemAdi} izlenen reklam</span><b>${sayi(l.length)}</b></div>
+      <div class="sayi"><span>Reklam izleyen kişi</span><b>${sayi(dizi.length)}</b></div>
+      <div class="sayi"><span>Kişi başı ortalama</span><b>${dizi.length ? (l.length / dizi.length).toLocaleString("tr-TR", { maximumFractionDigits: 1 }) : 0}</b></div>
+      <div class="sayi"><span>En çok izleyen</span><b style="font-size:18px">${dizi.length ? (ad[dizi[0].id] ? esc(ad[dizi[0].id].ad) : "Misafir") + " · " + dizi[0].n : "—"}</b></div>
+    </div>
+    <div class="kart" style="padding:0;overflow:auto"><table><thead><tr><th>#</th><th>Oyuncu</th><th>İzlediği reklam</th><th>İlk izleme</th><th>Son izleme</th></tr></thead><tbody>
+      ${dizi.map((k, i) => `<tr class="${ad[k.id] ? "tik" : ""}" data-o="${ad[k.id] ? k.id : ""}"><td class="soluk">${i + 1}</td><td>${isim(k.id)}</td><td><b>${sayi(k.n)}</b></td><td>${tarih(k.ilk)}</td><td>${once(k.son)}</td></tr>`).join("") || '<tr><td colspan="5" class="soluk">Bu dönemde izlenen reklam yok.</td></tr>'}
+    </tbody></table></div>
+    <div class="kart"><h4>Son izlenen reklamlar</h4>
+      ${l.slice(0, 50).map(e => `<div class="mesaj"><span class="soluk kucuk" style="width:130px">${tarih(e.zaman)}</span><div class="m">${isim(e.oyuncu)}</div><span class="soluk kucuk">sürüm ${esc(e.surum || "—")}</span></div>`).join("") || '<p class="soluk">Henüz yok.</p>'}
+    </div>`;
+  $("#r_donem").value = reklamDonem; $("#r_donem").onchange = () => { reklamDonem = $("#r_donem").value; git("reklam"); };
+  document.querySelectorAll("tr[data-o]").forEach(t => { if (t.dataset.o) t.onclick = () => oyuncuAc(t.dataset.o); });
 }
 
 // ---------- destek ----------
