@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Çamurlu Rota · Yönetim Paneli</title>
+<style>
+:root{--bg:#120e0a;--kart:#1d1610;--kart2:#261d15;--cizgi:#3a2b1d;--yazi:#eadfce;--soluk:#a8957c;--vurgu:#f2a33a;--altin:#f2c64a;--kirmizi:#e0533f;--yesil:#4cbb6c;--mavi:#4a90e2}
+*{box-sizing:border-box}body{margin:0;font-family:Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--yazi);font-size:14px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{background:var(--kart2);border:1px solid var(--cizgi);border-radius:8px;padding:7px 13px;cursor:pointer}
+button:hover{border-color:var(--vurgu)}button.ana{background:var(--vurgu);color:#1a1209;border:0;font-weight:600}
+button.tehlike{background:#5a1d16;border-color:#8a2e22}button.tehlike:hover{background:#7a2a20}button.yesil{background:#1d4a2a;border-color:#2e7a44}
+button:disabled{opacity:.5;cursor:default}
+input,select,textarea{background:#0f0b08;border:1px solid var(--cizgi);border-radius:8px;padding:7px 10px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--vurgu)}
+#giris{max-width:380px;margin:12vh auto;background:var(--kart);border:1px solid var(--cizgi);border-radius:16px;padding:30px}
+#giris h1{margin:0 0 4px;color:var(--altin);letter-spacing:1px}#giris input{width:100%;margin:8px 0}#giris button{width:100%;margin-top:10px;padding:10px}
+#uygulama{display:none;min-height:100vh}
+aside{position:fixed;left:0;top:0;bottom:0;width:220px;background:#0c0906;border-right:1px solid var(--cizgi);padding:18px 10px;overflow:auto}
+aside h2{color:var(--altin);font-size:18px;margin:0 8px 18px;letter-spacing:1px}
+aside a{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-radius:8px;color:var(--yazi);text-decoration:none;margin-bottom:2px;cursor:pointer}
+aside a:hover{background:var(--kart)}aside a.secili{background:var(--kart2);color:var(--vurgu)}
+.rozet{background:var(--kirmizi);color:#fff;border-radius:10px;padding:0 7px;font-size:12px;min-width:20px;text-align:center}
+aside .alt{position:absolute;bottom:14px;left:10px;right:10px;color:var(--soluk);font-size:12px}
+main{margin-left:220px;padding:22px 28px 60px}
+h3{margin:0 0 14px;font-size:20px}
+.izgara{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-bottom:20px}
+.sayi{background:var(--kart);border:1px solid var(--cizgi);border-radius:12px;padding:14px 16px}
+.sayi b{display:block;font-size:26px;color:var(--yazi);margin-top:4px}.sayi span{color:var(--soluk);font-size:12.5px}
+.sayi.uyari b{color:var(--kirmizi)}.sayi.iyi b{color:var(--yesil)}
+.kart{background:var(--kart);border:1px solid var(--cizgi);border-radius:12px;padding:16px;margin-bottom:16px}
+.kart h4{margin:0 0 12px;color:var(--altin)}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px 9px;border-bottom:1px solid var(--cizgi);vertical-align:top}
+th{color:var(--soluk);font-weight:600;font-size:12.5px;position:sticky;top:0;background:var(--kart)}
+tr.tik{cursor:pointer}tr.tik:hover td{background:var(--kart2)}
+.arac{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.etiket{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;background:var(--kart2);border:1px solid var(--cizgi)}
+.etiket.k{background:#5a1d16;border-color:#8a2e22}.etiket.s{background:#4a3a10;border-color:#8a6a1e}.etiket.y{background:#1d4a2a;border-color:#2e7a44}.etiket.m{background:#1c3350;border-color:#2e5a8a}
+.soluk{color:var(--soluk)}.kucuk{font-size:12px}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:flex-start;justify-content:center;padding:5vh 16px;overflow:auto;z-index:10}
+#modal .ic{background:var(--kart);border:1px solid var(--cizgi);border-radius:16px;padding:22px;width:min(760px,100%)}
+.satir{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0}.satir>*{flex:1;min-width:140px}
+.bilgi{display:grid;grid-template-columns:150px 1fr;gap:6px 12px;margin:10px 0 16px}.bilgi div:nth-child(odd){color:var(--soluk)}
+#bildirim{position:fixed;right:20px;bottom:20px;display:flex;flex-direction:column;gap:8px;z-index:20}
+#bildirim div{background:var(--kart2);border:1px solid var(--vurgu);border-radius:10px;padding:10px 16px;max-width:380px}
+#bildirim div.hata{border-color:var(--kirmizi)}
+.mesaj{padding:9px 0;border-bottom:1px solid var(--cizgi);display:flex;gap:12px;align-items:flex-start}.mesaj .m{flex:1;word-break:break-word}
+.grafik{display:flex;align-items:flex-end;gap:6px;height:170px;padding-top:10px}
+.grafik .g{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
+.grafik .cub{display:flex;gap:2px;align-items:flex-end;height:130px;width:100%;justify-content:center}
+.grafik .cub i{display:block;width:44%;border-radius:4px 4px 0 0;min-height:2px}
+.grafik small{color:var(--soluk);font-size:11px}
+.lejant{display:flex;gap:16px;font-size:12.5px;color:var(--soluk);margin-top:8px}.lejant i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+.anahtar{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--cizgi);gap:16px}
+.anahtar p{margin:2px 0 0;color:var(--soluk);font-size:12.5px}
+@media (max-width:800px){aside{position:static;width:auto}main{margin-left:0;padding:16px}aside .alt{position:static;margin-top:10px}}
+</style>
+</head>
+<body>
+
+<div id="giris">
+  <h1>ÇAMURLU ROTA</h1>
+  <p class="soluk">Yönetim Paneli · sadece yöneticiler</p>
+  <input id="g_eposta" type="email" placeholder="Yönetici e-postası" autocomplete="username">
+  <input id="g_sifre" type="password" placeholder="Şifre" autocomplete="current-password">
+  <button class="ana" id="g_btn">Giriş Yap</button>
+  <p id="g_hata" style="color:var(--kirmizi);min-height:20px"></p>
+  <p class="soluk kucuk" style="text-align:center"><a id="g_mod" style="color:var(--vurgu);cursor:pointer">Yönetici olarak eklenecek misin? Hesap oluştur</a></p>
+</div>
+
+<div id="uygulama">
+  <aside>
+    <h2>ÇAMURLU ROTA</h2>
+    <a data-s="genel">📊 Genel Bakış</a>
+    <a data-s="oyuncular">👥 Oyuncular</a>
+    <a data-s="supheli">🚩 Hile Şüphesi <span class="rozet" id="r_supheli" hidden></span></a>
+    <a data-s="banli">⛔ Banlılar</a>
+    <a data-s="sohbet">💬 Sohbet</a>
+    <a data-s="sikayet">⚠️ Şikayetler <span class="rozet" id="r_sikayet" hidden></span></a>
+    <a data-s="destek">🛟 Destek <span class="rozet" id="r_destek" hidden></span></a>
+    <a data-s="duyuru">📢 Duyurular</a>
+    <a data-s="hediye">🎁 Hediyeler</a>
+    <a data-s="ayar">⚙️ Oyun Ayarları</a>
+    <a data-s="silme">🗑️ Hesap Silme</a>
+    <a data-s="yonetici">🛡️ Yöneticiler</a>
+    <div class="alt"><div id="kim"></div><button id="cikis" style="margin-top:8px;width:100%">Çıkış</button></div>
+  </aside>
+  <main id="icerik"></main>
+</div>
+
+<div id="modal"><div class="ic" id="modal_ic"></div></div>
+<div id="bildirim"></div>
+
+<script>
+"use strict";
+const ADRES = "https://jbhwwpncbhiixrcsoomd.supabase.co";
+const ANAHTAR = "sb_publishable_uYKIQAumIOWZXYkYRVL7wQ_Ozp0-W0k";   // herkese açık anahtar; yetki veritabanındaki yönetici kuralından gelir
+let oturum = JSON.parse(localStorage.getItem("camu_yonetim") || "null");
+let bolum = "genel", yenileZamanlayici = null;
+const $ = s => document.querySelector(s);
+
+// ---------- yardımcılar ----------
+function esc(s){ return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function tarih(s){ if(!s) return "—"; const d = new Date(s); return d.toLocaleDateString("tr-TR") + " " + d.toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"}); }
+function once(s){ if(!s) return "—"; const sn = (Date.now() - new Date(s)) / 1000;
+  if (sn < 60) return "az önce"; if (sn < 3600) return Math.floor(sn/60) + " dk önce"; if (sn < 86400) return Math.floor(sn/3600) + " saat önce"; return Math.floor(sn/86400) + " gün önce"; }
+function sayi(n){ return Number(n || 0).toLocaleString("tr-TR"); }
+function bildir(m, hata){ const d = document.createElement("div"); if (hata) d.className = "hata"; d.textContent = m; $("#bildirim").appendChild(d); setTimeout(() => d.remove(), hata ? 7000 : 3500); }
+function rutbe(sv){ const t=[[5,"Acemi"],[10,"Çaylak"],[20,"Tecrübeli"],[30,"Usta"],[40,"Kıdemli"],[50,"Profesyonel"],[60,"Elit"],[75,"Efsane"],[90,"Kıdemli Efsane"],[99,"Zirve"]];
+  if (sv >= 100) return "Altın Zirve"; for (const [s,a] of t) if (sv <= s) return a; return "Zirve"; }
+
+async function istek(yontem, yol, govde, ek = {}){
+  if (oturum && Date.now() > oturum.bitis - 60000) await yenile();
+  const h = { apikey: ANAHTAR, "Content-Type": "application/json", ...ek };
+  if (oturum) h.Authorization = "Bearer " + oturum.erisim;
+  const r = await fetch(ADRES + yol, { method: yontem, headers: h, body: govde === undefined ? undefined : JSON.stringify(govde) });
+  const metin = await r.text(); let veri = null; try { veri = metin ? JSON.parse(metin) : null; } catch { veri = metin; }
+  if (r.status === 401 && oturum) { cikisYap(); throw new Error("Oturum süresi doldu, tekrar giriş yap."); }
+  if (!r.ok) throw new Error((veri && (veri.message || veri.msg || veri.error_description || veri.error)) || ("Hata " + r.status));
+  return veri;
+}
+const rest = (y, yol, g, ek) => istek(y, "/rest/v1/" + yol, g, ek);
+const rpc = (ad, arg) => istek("POST", "/rest/v1/rpc/" + ad, arg || {});
+
+function oturumKaydet(v){ oturum = { erisim: v.access_token, yenile: v.refresh_token, bitis: Date.now() + v.expires_in * 1000, eposta: v.user?.email || oturum?.eposta, id: v.user?.id || oturum?.id, rol: oturum?.rol };
+  localStorage.setItem("camu_yonetim", JSON.stringify(oturum)); }
+async function yenile(){
+  const r = await fetch(ADRES + "/auth/v1/token?grant_type=refresh_token", { method: "POST", headers: { apikey: ANAHTAR, "Content-Type": "application/json" }, body: JSON.stringify({ refresh_token: oturum.yenile }) });
+  if (!r.ok) { cikisYap(); throw new Error("Oturum süresi doldu."); }
+  oturumKaydet(await r.json());
+}
+let kayitModu = false;
+$("#g_mod").onclick = () => { kayitModu = !kayitModu; $("#g_btn").textContent = kayitModu ? "Hesap Oluştur" : "Giriş Yap";
+  $("#g_mod").textContent = kayitModu ? "Zaten hesabın var mı? Giriş yap" : "Yönetici olarak eklenecek misin? Hesap oluştur"; $("#g_hata").textContent = ""; };
+async function hesapOlustur(){
+  const e = $("#g_eposta").value.trim(), s = $("#g_sifre").value;
+  if (!e || s.length < 8) { $("#g_hata").textContent = "E-posta gir ve en az 8 karakterli bir şifre belirle."; return; }
+  $("#g_btn").disabled = true;
+  try {
+    const r = await fetch(ADRES + "/auth/v1/signup", { method: "POST", headers: { apikey: ANAHTAR, "Content-Type": "application/json" }, body: JSON.stringify({ email: e, password: s }) });
+    const v = await r.json();
+    if (!r.ok) throw new Error(/already|registered/i.test(v.msg || v.error_description || "") ? "Bu e-postayla zaten bir hesap var. Giriş yapmayı dene." : (v.msg || v.error_description || "Hesap oluşturulamadı."));
+    $("#g_hata").style.color = "var(--yesil)";
+    $("#g_hata").textContent = v.access_token
+      ? "Hesap oluşturuldu. Şimdi panelin sahibine e-postanı söyle; seni Yöneticiler bölümünden eklesin. Sonra buradan giriş yap."
+      : "Hesap oluşturuldu. E-postana gelen onay bağlantısına tıkla (açılan sayfa hata verse de sorun değil). Sonra panelin sahibine e-postanı söyle; seni eklesin.";
+  } catch (x) { $("#g_hata").style.color = "var(--kirmizi)"; $("#g_hata").textContent = x.message; }
+  $("#g_btn").disabled = false;
+}
+async function girisYap(){
+  if (kayitModu) return hesapOlustur();
+  $("#g_hata").style.color = "var(--kirmizi)";
+  $("#g_hata").textContent = ""; $("#g_btn").disabled = true;
+  try {
+    const r = await fetch(ADRES + "/auth/v1/token?grant_type=password", { method: "POST", headers: { apikey: ANAHTAR, "Content-Type": "application/json" },
+      body: JSON.stringify({ email: $("#g_eposta").value.trim(), password: $("#g_sifre").value }) });
+    const v = await r.json();
+    if (!r.ok) throw new Error(v.error_description || v.msg || "E-posta veya şifre yanlış.");
+    oturumKaydet(v);
+    await yoneticiMi();
+    basla();
+  } catch (e) { $("#g_hata").textContent = e.message; oturum = null; localStorage.removeItem("camu_yonetim"); }
+  $("#g_btn").disabled = false;
+}
+async function yoneticiMi(){
+  if (!oturum.id) { const u = await istek("GET", "/auth/v1/user"); oturum.id = u.id; oturum.eposta = u.email; }
+  const l = await rest("GET", `yoneticiler?id=eq.${oturum.id}&select=rol`);
+  if (!l || !l.length) throw new Error("Bu hesap henüz yönetici değil. Panelin sahibine e-postanı söyle; seni Yöneticiler bölümünden eklesin.");
+  oturum.rol = l[0].rol || "yonetici"; localStorage.setItem("camu_yonetim", JSON.stringify(oturum));
+}
+function cikisYap(){ oturum = null; localStorage.removeItem("camu_yonetim"); clearInterval(yenileZamanlayici); $("#uygulama").style.display = "none"; $("#giris").style.display = "block"; }
+
+function basla(){
+  $("#giris").style.display = "none"; $("#uygulama").style.display = "block";
+  $("#kim").textContent = (oturum.eposta || "") + (oturum.rol === "sahip" ? " · Sahip" : " · Yönetici");
+  git(bolum);
+  clearInterval(yenileZamanlayici);
+  yenileZamanlayici = setInterval(() => { rozetler(); if (["genel","sohbet","destek"].includes(bolum) && $("#modal").style.display !== "flex") git(bolum, true); }, 15000);
+}
+async function rozetler(){
+  try { const s = await rpc("yonetim_istatistik");
+    const r1 = $("#r_supheli"), r2 = $("#r_sikayet");
+    r1.hidden = !s.supheli; r1.textContent = s.supheli; r2.hidden = !s.sikayet_bekleyen; r2.textContent = s.sikayet_bekleyen;
+    try { const d = await rest("GET", "destek_talepleri?yonetici_okudu=eq.false&durum=neq.kapali&select=id"); s.destek_bekleyen = d.length;
+      const r3 = $("#r_destek"); r3.hidden = !d.length; r3.textContent = d.length; } catch {}
+    return s; } catch { return null; }
+}
+function git(s, sessiz){
+  bolum = s; document.querySelectorAll("aside a").forEach(a => a.classList.toggle("secili", a.dataset.s === s));
+  if (!sessiz) $("#icerik").innerHTML = '<p class="soluk">Yükleniyor...</p>';
+  ({ genel: genelBakis, oyuncular: () => oyuncular(""), supheli: () => oyuncular("suphe"), banli: () => oyuncular("banli"),
+     sohbet, sikayet: sikayetler, destek, duyuru: duyurular, hediye: hediyeler, ayar: ayarlar, silme: hesapSilme, yonetici: yoneticiler })[s]().catch(e => { $("#icerik").innerHTML = '<p style="color:var(--kirmizi)">' + esc(e.message) + "</p>"; });
+}
+document.querySelectorAll("aside a").forEach(a => a.onclick = () => git(a.dataset.s));
+
+// ---------- genel bakış ----------
+async function genelBakis(){
+  const s = await rozetler(); if (!s) throw new Error("İstatistik alınamadı. SQL güncellemesi çalıştırıldı mı?");
+  const kart = (b, d, sinif = "") => `<div class="sayi ${sinif}"><span>${b}</span><b>${d}</b></div>`;
+  const g = s.gunluk || []; const enCok = Math.max(1, ...g.map(x => Math.max(x.aktif, x.reklam, x.yeni)));
+  $("#icerik").innerHTML = `
+  <h3>Genel Bakış</h3>
+  <div class="kart"><h4>Oyuncular</h4><div class="izgara">
+    ${kart("Şu an çevrimiçi", sayi(s.cevrimici), "iyi")}${kart("Bugün oynayan", sayi(s.bugun_aktif))}${kart("Son 7 gün oynayan", sayi(s.hafta_aktif))}
+    ${kart("Son 30 gün oynayan", sayi(s.ay_aktif))}${kart("Toplam hesap (indiren)", sayi(s.toplam_hesap))}${kart("Bugün yeni", sayi(s.bugun_yeni))}
+    ${kart("Profil açan oyuncu", sayi(s.kayitli_oyuncu))}${kart("Gmail bağlı", sayi(s.google_bagli))}${kart("Bugünkü oturum", sayi(s.bugun_oturum))}
+  </div></div>
+  <div class="kart"><h4>Reklamlar</h4><div class="izgara">
+    ${kart("Bugün izlenen reklam", sayi(s.reklam_bugun))}${kart("Bugün reklam izleyen kişi", sayi(s.reklam_izleyen_bugun))}${kart("Son 7 gün reklam", sayi(s.reklam_hafta))}
+    ${kart("Toplam izlenen reklam", sayi(s.reklam_toplam))}${kart("Reklam izleyen kişi (toplam)", sayi(s.reklam_izleyen))}${kart("Araç satın alma", sayi(s.satin_alma_toplam))}
+  </div></div>
+  <div class="kart"><h4>Son 14 gün</h4>
+    <div class="grafik">${g.map(x => `<div class="g" title="${esc(x.gun)} · oynayan ${x.aktif} · reklam ${x.reklam} · yeni ${x.yeni}">
+      <div class="cub"><i style="height:${x.aktif / enCok * 100}%;background:var(--vurgu)"></i><i style="height:${x.reklam / enCok * 100}%;background:var(--mavi)"></i></div><small>${esc(x.gun)}</small></div>`).join("")}</div>
+    <div class="lejant"><span><i style="background:var(--vurgu)"></i>Oynayan kişi</span><span><i style="background:var(--mavi)"></i>İzlenen reklam</span></div>
+  </div>
+  <div class="kart"><h4>Denetim</h4><div class="izgara">
+    ${kart("Bekleyen şikâyet", sayi(s.sikayet_bekleyen), s.sikayet_bekleyen ? "uyari" : "")}${kart("Hile şüphesi", sayi(s.supheli), s.supheli ? "uyari" : "")}
+    ${kart("Banlı oyuncu", sayi(s.banli))}${kart("Bugünkü mesaj", sayi(s.mesaj_bugun))}${kart("Silinen hesap", sayi(s.silinen))}
+    ${kart("Cevap bekleyen destek", sayi(s.destek_bekleyen), s.destek_bekleyen ? "uyari" : "")}
+  </div></div>
+  <p class="soluk kucuk">Sayfa 15 saniyede bir kendini yeniler. Oynayan ve reklam sayıları oyunun bu güncellemesinden sonra toplanmaya başlar.</p>`;
+}
+
+// ---------- oyuncular ----------
+let sonArama = "";
+async function oyuncular(sadece){
+  const baslik = { "": "Oyuncular", suphe: "Hile Şüphesi", banli: "Banlı Oyuncular" }[sadece];
+  const l = await rpc("yonetim_oyuncular", { arama: sadece ? "" : sonArama, sadece, lim: 200 });
+  $("#icerik").innerHTML = `<h3>${baslik}</h3>
+    ${sadece === "suphe" ? '<p class="soluk">Oyun, puanı ya da elemesi normalden hızlı artan oyuncuları otomatik işaretler. İncele; hile ise banla, değilse şüpheyi temizle.</p>' : ""}
+    ${sadece ? "" : `<div class="arac"><input id="ara" placeholder="Ad, e-posta veya oyuncu kimliği ara..." style="flex:1;max-width:420px" value="${esc(sonArama)}"><button class="ana" id="ara_btn">Ara</button>
+      <select id="filtre"><option value="">Hepsi</option><option value="cevrimici">Çevrimiçi</option><option value="susturulan">Susturulan</option></select></div>`}
+    <div class="kart" style="padding:0;overflow:auto"><table><thead><tr><th>Oyuncu</th><th>Seviye</th><th>Tehlike puanı</th><th>Eleme</th><th>Reklam</th><th>Son görülme</th><th>Durum</th></tr></thead>
+    <tbody id="liste"></tbody></table></div>`;
+  liste(l);
+  if (!sadece) {
+    $("#ara_btn").onclick = async () => { sonArama = $("#ara").value.trim(); liste(await rpc("yonetim_oyuncular", { arama: sonArama, sadece: $("#filtre").value, lim: 200 })); };
+    $("#ara").onkeydown = e => { if (e.key === "Enter") $("#ara_btn").click(); };
+    $("#filtre").onchange = () => $("#ara_btn").click();
+  }
+}
+let oyuncuOnbellek = {};
+function liste(l){
+  oyuncuOnbellek = {}; l.forEach(o => oyuncuOnbellek[o.id] = o);
+  $("#liste").innerHTML = l.length ? l.map(o => `<tr class="tik" data-id="${o.id}">
+    <td><b>${esc(o.ad)}</b>${o.google ? ' <span class="etiket m">Gmail</span>' : ""}<div class="soluk kucuk">${esc(o.eposta || "misafir")}</div></td>
+    <td>${o.seviye} <span class="soluk kucuk">${rutbe(o.seviye)}</span></td><td>${sayi(o.puan)}</td><td>${sayi(o.eleme)}</td><td>${sayi(o.reklam)}</td>
+    <td>${once(o.son_gorulme)}</td><td>${durumEtiket(o)}</td></tr>`).join("") : '<tr><td colspan="7" class="soluk">Kayıt yok.</td></tr>';
+  document.querySelectorAll("#liste tr.tik").forEach(t => t.onclick = () => oyuncuAc(t.dataset.id));
+}
+function durumEtiket(o){
+  let s = "";
+  if (o.yasakli) s += '<span class="etiket k">Banlı</span> ';
+  if (o.susturma_bitis && new Date(o.susturma_bitis) > new Date()) s += '<span class="etiket m">Susturuldu</span> ';
+  if (o.suphe > 0) s += `<span class="etiket s">Şüphe ${o.suphe}</span> `;
+  if (o.son_gorulme && Date.now() - new Date(o.son_gorulme) < 180000) s += '<span class="etiket y">Çevrimiçi</span>';
+  return s || '<span class="soluk">—</span>';
+}
+async function oyuncuAc(id){
+  let o = oyuncuOnbellek[id];
+  if (!o) { const l = await rpc("yonetim_oyuncular", { arama: id, sadece: "", lim: 1 }); o = l[0]; if (!o) return bildir("Oyuncu bulunamadı", true); }
+  const mesajlar = await rest("GET", `mesajlar?oyuncu=eq.${id}&select=id,metin,kanal,zaman&order=id.desc&limit=20`);
+  modal(`<h3>${esc(o.ad)} ${durumEtiket(o)}</h3>
+    <div class="bilgi">
+      <div>E-posta</div><div>${esc(o.eposta || "Misafir (Gmail bağlı değil)")}</div>
+      <div>Oyuncu kimliği</div><div class="kucuk">${esc(o.id)}</div>
+      <div>Seviye / Rütbe</div><div>${o.seviye} · ${rutbe(o.seviye)}</div>
+      <div>Tehlike puanı / Eleme</div><div>${sayi(o.puan)} / ${sayi(o.eleme)}</div>
+      <div>İzlediği reklam</div><div>${sayi(o.reklam)}</div><div>Mesaj sayısı</div><div>${sayi(o.mesaj)}</div>
+      <div>Oyun sürümü</div><div>${esc(o.surum || "—")}</div>
+      <div>Hesap açılışı</div><div>${tarih(o.olusturma)}</div><div>Son görülme</div><div>${tarih(o.son_gorulme)} (${once(o.son_gorulme)})</div>
+      ${o.yasakli ? `<div>Ban sebebi</div><div>${esc(o.ban_sebep || "—")}</div><div>Ban bitişi</div><div>${o.ban_bitis ? tarih(o.ban_bitis) : "Kalıcı"}</div>` : ""}
+      ${o.susturma_bitis && new Date(o.susturma_bitis) > new Date() ? `<div>Susturma bitişi</div><div>${tarih(o.susturma_bitis)}</div>` : ""}
+      ${o.suphe > 0 ? `<div>Şüphe notu</div><div style="color:var(--altin)">${esc(o.suphe_not || "")}</div>` : ""}
+    </div>
+    <div class="kart"><h4>Ban</h4>
+      ${o.yasakli ? `<button class="yesil" id="m_bankaldir">Banı Kaldır</button>` : `
+      <div class="satir"><input id="m_sebep" placeholder="Sebep (oyuncu görür) ör: Hile kullanımı"><select id="m_sure">
+        <option value="1">1 gün</option><option value="3">3 gün</option><option value="7" selected>7 gün</option><option value="30">30 gün</option><option value="0">Kalıcı</option></select>
+        <button class="tehlike" id="m_banla">Banla</button></div>`}
+    </div>
+    <div class="kart"><h4>Sohbet</h4><div class="arac">
+      <select id="m_sustur_sure"><option value="1">1 saat</option><option value="24" selected>24 saat</option><option value="168">7 gün</option></select>
+      <button id="m_sustur">Sustur</button><button id="m_susturkaldir">Susturmayı Kaldır</button><button class="tehlike" id="m_mesajsil">Tüm Mesajlarını Sil</button></div>
+      ${mesajlar.length ? mesajlar.map(m => `<div class="mesaj"><span class="soluk kucuk">${tarih(m.zaman)}<br>${esc(m.kanal)}</span><div class="m">${esc(m.metin)}</div></div>`).join("") : '<p class="soluk">Mesajı yok.</p>'}
+    </div>
+    <div class="kart"><h4>Puan düzeltme</h4>
+      <p class="soluk kucuk">Hile ile kazanılan puanı geri al. Oyun bir sonraki bağlantıda bu değerleri kendi kaydına da yazar.</p>
+      <div class="satir"><label>Tehlike puanı<input id="m_puan" type="number" min="0" value="${o.puan}"></label><label>Eleme<input id="m_eleme" type="number" min="0" value="${o.eleme}"></label></div>
+      <div class="arac"><button class="ana" id="m_puankaydet">Kaydet</button><button id="m_sifirla">Sıfırla</button>${o.suphe > 0 ? '<button class="yesil" id="m_suphetemizle">Şüpheyi Temizle (hile değil)</button>' : ""}</div>
+    </div>
+    <div class="kart"><h4>Hediye gönder</h4><div class="satir"><input id="m_hpara" type="number" min="0" placeholder="Para ₺"><input id="m_hmermi" type="number" min="0" placeholder="Mermi"><input id="m_hmesaj" placeholder="Mesaj (ör: Özür hediyesi)"><button class="ana" id="m_hediye">Gönder</button></div></div>
+    <div class="arac" style="justify-content:space-between"><button class="tehlike" id="m_hesapsil">Hesabı Kalıcı Olarak Sil</button><button id="m_kapat">Kapat</button></div>`);
+  const yap = async (is, mesaj) => { try { await is(); bildir(mesaj); delete oyuncuOnbellek[id]; kapatModal(); git(bolum, true); } catch (e) { bildir(e.message, true); } };
+  const guncelle = v => rest("PATCH", `oyuncular?id=eq.${id}`, v, { Prefer: "return=minimal" });
+  $("#m_kapat").onclick = kapatModal;
+  if (o.yasakli) $("#m_bankaldir").onclick = () => yap(() => guncelle({ yasakli: false, ban_sebep: null, ban_bitis: null }), "Ban kaldırıldı");
+  else $("#m_banla").onclick = () => { const g = +$("#m_sure").value; const sebep = $("#m_sebep").value.trim() || "Oyun kurallarını ihlal";
+    if (!confirm(`${o.ad} ${g ? g + " gün" : "KALICI olarak"} banlansın mı?`)) return;
+    yap(() => guncelle({ yasakli: true, ban_sebep: sebep, ban_bitis: g ? new Date(Date.now() + g * 86400000).toISOString() : null }), "Oyuncu banlandı"); };
+  $("#m_sustur").onclick = () => yap(() => guncelle({ susturma_bitis: new Date(Date.now() + $("#m_sustur_sure").value * 3600000).toISOString() }), "Oyuncu susturuldu");
+  $("#m_susturkaldir").onclick = () => yap(() => guncelle({ susturma_bitis: null }), "Susturma kaldırıldı");
+  $("#m_mesajsil").onclick = () => confirm("Bu oyuncunun tüm mesajları silinsin mi?") && yap(() => rest("DELETE", `mesajlar?oyuncu=eq.${id}`, undefined, { Prefer: "return=minimal" }), "Mesajlar silindi");
+  const puanYaz = (p, e) => yap(async () => { const r = await rest("GET", `oyuncular?id=eq.${id}&select=duzeltme`); await guncelle({ puan: p, eleme: e, duzeltme: (r[0]?.duzeltme || 0) + 1 }); }, "Puan güncellendi");
+  $("#m_puankaydet").onclick = () => puanYaz(Math.max(0, +$("#m_puan").value | 0), Math.max(0, +$("#m_eleme").value | 0));
+  $("#m_sifirla").onclick = () => confirm("Puan ve eleme sıfırlansın mı?") && puanYaz(0, 0);
+  if (o.suphe > 0) $("#m_suphetemizle").onclick = () => yap(() => guncelle({ suphe: 0, suphe_not: null }), "Şüphe temizlendi");
+  $("#m_hediye").onclick = () => { const p = +$("#m_hpara").value | 0, m = +$("#m_hmermi").value | 0; if (!p && !m) return bildir("Para ya da mermi gir", true);
+    yap(() => rest("POST", "hediyeler", { oyuncu: id, para: p, mermi: m, mesaj: $("#m_hmesaj").value.trim() }, { Prefer: "return=minimal" }), "Hediye gönderildi; oyuncu oyuna girince alacak"); };
+  $("#m_hesapsil").onclick = () => hesapSilOnay(o);
+}
+function hesapSilOnay(o){
+  const y = prompt(`${o.ad} (${o.eposta || "misafir"}) hesabı ve TÜM verileri kalıcı olarak silinecek. Geri alınamaz.\nOnaylamak için SİL yaz:`);
+  if (y === null) return; if (y.trim().toLocaleUpperCase("tr-TR") !== "SİL") return bildir("Onay yazısı yanlış, silinmedi", true);
+  rpc("yonetim_hesap_sil", { hedef: o.id }).then(() => { bildir("Hesap silindi"); kapatModal(); git(bolum); }).catch(e => bildir(e.message, true));
+}
+
+// ---------- sohbet ----------
+let sohbetKanal = "genel";
+async function sohbet(){
+  const l = await rest("GET", `mesajlar?kanal=eq.${sohbetKanal}&select=id,oyuncu,ad,metin,seviye,zaman&order=id.desc&limit=150`);
+  const sik = await rest("GET", "sikayetler?select=mesaj_id");
+  const sayac = {}; sik.forEach(s => sayac[s.mesaj_id] = (sayac[s.mesaj_id] || 0) + 1);
+  const secim = $("#icerik").querySelector("#kanal") ? null : 1;
+  $("#icerik").innerHTML = `<h3>Sohbet</h3><div class="arac">
+    <select id="kanal"><option value="genel">Genel</option><option value="dunya">Dünya</option></select>
+    <button id="tazele">Yenile</button><span class="soluk kucuk">Son 150 mesaj · 15 sn'de bir yenilenir</span></div>
+    <div class="kart">${l.length ? l.map(m => `<div class="mesaj"><span class="soluk kucuk" style="width:110px">${tarih(m.zaman)}</span>
+      <a class="tik" data-o="${m.oyuncu}" style="color:var(--vurgu);cursor:pointer;min-width:120px"><b>${esc(m.ad)}</b> <span class="soluk kucuk">Sv ${m.seviye}</span></a>
+      <div class="m">${esc(m.metin)} ${sayac[m.id] ? `<span class="etiket k">${sayac[m.id]} şikâyet</span>` : ""}</div>
+      <button class="tehlike" data-sil="${m.id}">Sil</button></div>`).join("") : '<p class="soluk">Mesaj yok.</p>'}</div>`;
+  $("#kanal").value = sohbetKanal; $("#kanal").onchange = () => { sohbetKanal = $("#kanal").value; git("sohbet"); };
+  $("#tazele").onclick = () => git("sohbet");
+  document.querySelectorAll("[data-o]").forEach(a => a.onclick = () => oyuncuAc(a.dataset.o));
+  document.querySelectorAll("[data-sil]").forEach(b => b.onclick = async () => { try { await rest("DELETE", `mesajlar?id=eq.${b.dataset.sil}`, undefined, { Prefer: "return=minimal" }); bildir("Mesaj silindi"); git("sohbet", true); } catch (e) { bildir(e.message, true); } });
+}
+
+// ---------- şikayetler ----------
+async function sikayetler(){
+  const l = await rest("GET", "sikayetler?select=mesaj_id,zaman,mesajlar(id,oyuncu,ad,metin,kanal,zaman)&order=zaman.desc&limit=500");
+  const grup = {}; l.forEach(s => { if (!s.mesajlar) return; const g = grup[s.mesaj_id] ||= { m: s.mesajlar, n: 0, son: s.zaman }; g.n++; });
+  const dizi = Object.values(grup).sort((a, b) => b.n - a.n);
+  $("#icerik").innerHTML = `<h3>Şikâyetler</h3><p class="soluk">3 ve üzeri şikâyet alan mesaj oyunda otomatik gizlenir. "Reddet" mesajı geri açar.</p>
+    <div class="kart">${dizi.length ? dizi.map(g => `<div class="mesaj"><span class="etiket k">${g.n} şikâyet</span>
+      <div class="m"><a data-o="${g.m.oyuncu}" style="color:var(--vurgu);cursor:pointer"><b>${esc(g.m.ad)}</b></a> <span class="soluk kucuk">${tarih(g.m.zaman)} · ${esc(g.m.kanal)}</span><br>${esc(g.m.metin)}</div>
+      <button class="tehlike" data-msil="${g.m.id}">Mesajı Sil</button><button data-red="${g.m.id}">Reddet</button><button data-o="${g.m.oyuncu}">Oyuncuyu Aç</button></div>`).join("") : '<p class="soluk">Bekleyen şikâyet yok. 👍</p>'}</div>`;
+  document.querySelectorAll("[data-o]").forEach(a => a.onclick = () => oyuncuAc(a.dataset.o));
+  document.querySelectorAll("[data-msil]").forEach(b => b.onclick = async () => { try { await rest("DELETE", `mesajlar?id=eq.${b.dataset.msil}`, undefined, { Prefer: "return=minimal" }); bildir("Mesaj silindi"); git("sikayet"); rozetler(); } catch (e) { bildir(e.message, true); } });
+  document.querySelectorAll("[data-red]").forEach(b => b.onclick = async () => { try { await rest("DELETE", `sikayetler?mesaj_id=eq.${b.dataset.red}`, undefined, { Prefer: "return=minimal" }); bildir("Şikâyet reddedildi"); git("sikayet"); rozetler(); } catch (e) { bildir(e.message, true); } });
+}
+
+// ---------- duyurular ----------
+async function duyurular(){
+  const l = await rest("GET", "duyurular?select=id,baslik,metin,zaman&order=id.desc&limit=50");
+  $("#icerik").innerHTML = `<h3>Duyurular</h3><div class="kart"><h4>Yeni duyuru</h4>
+    <input id="d_baslik" placeholder="Başlık" style="width:100%;margin-bottom:8px" maxlength="60"><textarea id="d_metin" rows="3" placeholder="Duyuru metni (oyunda Sohbet > Duyurular sekmesinde görünür)" style="width:100%" maxlength="400"></textarea>
+    <div class="arac" style="margin-top:8px"><button class="ana" id="d_ekle">Yayınla</button></div></div>
+    <div class="kart">${l.map(d => `<div class="mesaj"><span class="soluk kucuk" style="width:110px">${tarih(d.zaman)}</span><div class="m"><b>${esc(d.baslik)}</b><br>${esc(d.metin)}</div><button class="tehlike" data-sil="${d.id}">Sil</button></div>`).join("") || '<p class="soluk">Duyuru yok.</p>'}</div>`;
+  $("#d_ekle").onclick = async () => { const b = $("#d_baslik").value.trim(), m = $("#d_metin").value.trim(); if (!b || !m) return bildir("Başlık ve metin gir", true);
+    try { await rest("POST", "duyurular", { baslik: b, metin: m }, { Prefer: "return=minimal" }); bildir("Duyuru yayınlandı"); git("duyuru"); } catch (e) { bildir(e.message, true); } };
+  document.querySelectorAll("[data-sil]").forEach(b => b.onclick = async () => { if (!confirm("Duyuru silinsin mi?")) return; try { await rest("DELETE", `duyurular?id=eq.${b.dataset.sil}`, undefined, { Prefer: "return=minimal" }); git("duyuru"); } catch (e) { bildir(e.message, true); } });
+}
+
+// ---------- hediyeler ----------
+async function hediyeler(){
+  const l = await rest("GET", "hediyeler?select=id,oyuncu,para,mermi,mesaj,zaman,bitis&order=id.desc&limit=100");
+  const al = await rest("GET", "alinan_hediyeler?select=hediye&limit=100000");
+  const sayac = {}; al.forEach(a => sayac[a.hediye] = (sayac[a.hediye] || 0) + 1);
+  $("#icerik").innerHTML = `<h3>Hediyeler</h3><div class="kart"><h4>Herkese hediye gönder</h4>
+    <p class="soluk kucuk">Oyuncular oyuna girdiğinde hediye otomatik hesaplarına eklenir ve ekranda "HEDİYE GELDİ!" yazar. Her oyuncu bir hediyeyi bir kez alır. Tek bir oyuncuya hediye için Oyuncular'dan oyuncuyu aç.</p>
+    <div class="satir"><input id="h_para" type="number" min="0" placeholder="Para ₺"><input id="h_mermi" type="number" min="0" placeholder="Mermi"><input id="h_mesaj" placeholder="Mesaj (ör: Bayram hediyesi!)"><select id="h_sure"><option value="3">3 gün geçerli</option><option value="7" selected>7 gün geçerli</option><option value="30">30 gün geçerli</option><option value="0">Süresiz</option></select><button class="ana" id="h_gonder">Herkese Gönder</button></div></div>
+    <div class="kart" style="padding:0;overflow:auto"><table><thead><tr><th>Tarih</th><th>Kime</th><th>Para</th><th>Mermi</th><th>Mesaj</th><th>Alan</th><th>Bitiş</th><th></th></tr></thead><tbody>
+    ${l.map(h => `<tr><td>${tarih(h.zaman)}</td><td>${h.oyuncu ? `<a data-o="${h.oyuncu}" style="color:var(--vurgu);cursor:pointer">Tek oyuncu</a>` : "Herkes"}</td><td>${sayi(h.para)}</td><td>${sayi(h.mermi)}</td><td>${esc(h.mesaj)}</td><td>${sayi(sayac[h.id])}</td><td>${h.bitis ? tarih(h.bitis) : "Süresiz"}</td><td><button class="tehlike" data-sil="${h.id}">Sil</button></td></tr>`).join("") || '<tr><td colspan="8" class="soluk">Hediye yok.</td></tr>'}
+    </tbody></table></div>`;
+  $("#h_gonder").onclick = async () => { const p = +$("#h_para").value | 0, m = +$("#h_mermi").value | 0, g = +$("#h_sure").value; if (!p && !m) return bildir("Para ya da mermi gir", true);
+    if (!confirm(`TÜM oyunculara ${sayi(p)} ₺ ve ${m} mermi gönderilsin mi?`)) return;
+    try { await rest("POST", "hediyeler", { para: p, mermi: m, mesaj: $("#h_mesaj").value.trim(), bitis: g ? new Date(Date.now() + g * 86400000).toISOString() : null }, { Prefer: "return=minimal" }); bildir("Hediye gönderildi"); git("hediye"); } catch (e) { bildir(e.message, true); } };
+  document.querySelectorAll("[data-o]").forEach(a => a.onclick = () => oyuncuAc(a.dataset.o));
+  document.querySelectorAll("[data-sil]").forEach(b => b.onclick = async () => { if (!confirm("Hediye silinsin mi? (Henüz almayanlar alamaz)")) return; try { await rest("DELETE", `hediyeler?id=eq.${b.dataset.sil}`, undefined, { Prefer: "return=minimal" }); git("hediye"); } catch (e) { bildir(e.message, true); } });
+}
+
+// ---------- oyun ayarları ----------
+async function ayarlar(){
+  const l = await rest("GET", "ayarlar?select=anahtar,deger"); const a = {}; l.forEach(x => a[x.anahtar] = x.deger);
+  $("#icerik").innerHTML = `<h3>Oyun Ayarları</h3><p class="soluk">Değişiklikler oyunculara en geç 1 dakika içinde ulaşır.</p>
+    <div class="kart">
+      <div class="anahtar"><div><b>Bakım modu</b><p>Açıkken oyuncular oyuna giremez, aşağıdaki mesajı görür. Oyundakiler de durdurulur.</p></div><select id="a_bakim"><option value="false">Kapalı</option><option value="true">AÇIK</option></select></div>
+      <div class="anahtar"><div style="flex:1"><b>Bakım mesajı</b><input id="a_bakim_mesaji" style="width:100%;margin-top:6px" maxlength="200"></div></div>
+      <div class="anahtar"><div><b>Sohbet</b><p>Kapalıyken kimse mesaj yazamaz (okuma devam eder).</p></div><select id="a_sohbet_acik"><option value="true">Açık</option><option value="false">KAPALI</option></select></div>
+      <div class="anahtar"><div><b>En düşük oyun sürümü</b><p>Bundan eski sürümü olanlar "GÜNCELLEME GEREKLİ" ekranı görür. Şu an: Unity'deki Version değeri (ör. 0.1.0).</p></div><input id="a_min_surum" style="width:120px"></div>
+      <div class="anahtar"><div><b>Para çarpanı (etkinlik)</b><p>Görev ve Tehlikeli Alan para ödülleri bununla çarpılır. 1 = normal, 2 = iki kat para haftası.</p></div><select id="a_para_carpani"><option>1</option><option>1.5</option><option>2</option><option>3</option></select></div>
+      <div class="anahtar"><div style="flex:1"><b>Etkinlik mesajı</b><p>Oyuna girişte bir kez gösterilir. Boş = gösterilmez.</p><input id="a_etkinlik_mesaji" style="width:100%;margin-top:6px" maxlength="160" placeholder="ör: Bu hafta sonu tüm görevlerde 2 kat para!"></div></div>
+      <div class="arac" style="margin-top:14px"><button class="ana" id="a_kaydet">Kaydet</button></div>
+    </div>`;
+  const alanlar = ["bakim", "bakim_mesaji", "sohbet_acik", "min_surum", "para_carpani", "etkinlik_mesaji"];
+  alanlar.forEach(k => { const e = $("#a_" + k); if (a[k] !== undefined) { if (e.tagName === "SELECT" && ![...e.options].some(o => o.value === a[k])) e.add(new Option(a[k])); e.value = a[k]; } });
+  $("#a_kaydet").onclick = async () => {
+    if ($("#a_bakim").value === "true" && a.bakim !== "true" && !confirm("Bakım modu açılacak: oyundaki herkes durdurulacak. Emin misin?")) return;
+    try { await rest("POST", "ayarlar?on_conflict=anahtar", alanlar.map(k => ({ anahtar: k, deger: $("#a_" + k).value.trim(), guncelleme: new Date().toISOString() })), { Prefer: "resolution=merge-duplicates,return=minimal" }); bildir("Ayarlar kaydedildi"); git("ayar"); } catch (e) { bildir(e.message, true); } };
+}
+
+// ---------- hesap silme ----------
+async function hesapSilme(){
+  const s = await rpc("yonetim_istatistik");
+  $("#icerik").innerHTML = `<h3>Hesap Silme</h3>
+    <div class="kart"><p>Oyuncular hesaplarını <b>oyun içinden</b> (Ayarlar › Hesap › Hesabımı Sil) kendileri silebilir; bu otomatik yapılır.</p>
+    <p><b>camurlurota.destek@gmail.com</b> adresine "Hesap silme talebi" e-postası gelirse: e-postadaki Gmail adresini veya oyuncu adını aşağıda ara, doğru kişi olduğundan emin ol ve sil. Sonra oyuncuya "hesabınız silindi" diye cevap yaz.</p>
+    <p class="soluk">Toplam silinen hesap: <b>${sayi(s.silinen)}</b></p></div>
+    <div class="arac"><input id="s_ara" placeholder="Gmail adresi veya oyuncu adı" style="flex:1;max-width:420px"><button class="ana" id="s_btn">Ara</button></div>
+    <div class="kart" id="s_sonuc"><p class="soluk">Arama yap.</p></div>`;
+  $("#s_btn").onclick = async () => { const q = $("#s_ara").value.trim(); if (!q) return;
+    const l = await rpc("yonetim_oyuncular", { arama: q, sadece: "", lim: 20 }); l.forEach(o => oyuncuOnbellek[o.id] = o);
+    $("#s_sonuc").innerHTML = l.length ? l.map(o => `<div class="mesaj"><div class="m"><b>${esc(o.ad)}</b> · ${esc(o.eposta || "misafir")} <span class="soluk kucuk">· Sv ${o.seviye} · son ${once(o.son_gorulme)}</span></div><button data-o="${o.id}">Aç</button><button class="tehlike" data-s="${o.id}">Hesabı Sil</button></div>`).join("") : '<p class="soluk">Bulunamadı. Oyuncu hesabını zaten silmiş olabilir.</p>';
+    document.querySelectorAll("#s_sonuc [data-o]").forEach(b => b.onclick = () => oyuncuAc(b.dataset.o));
+    document.querySelectorAll("#s_sonuc [data-s]").forEach(b => b.onclick = () => hesapSilOnay(oyuncuOnbellek[b.dataset.s])); };
+  $("#s_ara").onkeydown = e => { if (e.key === "Enter") $("#s_btn").click(); };
+}
+
+// ---------- destek ----------
+const KATEGORI = { hata: "Hata / Sorun", hesap: "Hesap", magaza: "Mağaza / Para", sikayet: "Oyuncu Şikâyeti", oneri: "Öneri", diger: "Diğer" };
+const DURUM = { acik: '<span class="etiket s">Cevap bekliyor</span>', cevaplandi: '<span class="etiket y">Cevaplandı</span>', kapali: '<span class="etiket">Kapalı</span>' };
+let destekFiltre = "acik";
+async function destek(){
+  const f = destekFiltre === "hepsi" ? "" : `durum=eq.${destekFiltre}&`;
+  const l = await rest("GET", `destek_talepleri?${f}select=id,oyuncu,ad,kategori,konu,durum,yonetici_okudu,surum,olusturma,guncelleme&order=guncelleme.desc&limit=200`);
+  $("#icerik").innerHTML = `<h3>Destek</h3><p class="soluk">Oyuncular oyunda Ayarlar › Destek'ten yazar. Cevabın oyuncuya oyunda bildirim olarak gider.</p>
+    <div class="arac"><select id="d_filtre"><option value="acik">Cevap bekleyenler</option><option value="cevaplandi">Cevaplananlar</option><option value="kapali">Kapalılar</option><option value="hepsi">Hepsi</option></select></div>
+    <div class="kart" style="padding:0;overflow:auto"><table><thead><tr><th></th><th>Konu</th><th>Oyuncu</th><th>Tür</th><th>Durum</th><th>Son hareket</th></tr></thead><tbody>
+    ${l.map(t => `<tr class="tik" data-t="${t.id}"><td>${t.yonetici_okudu ? "" : '<span class="rozet">yeni</span>'}</td><td><b>${esc(t.konu)}</b></td><td>${esc(t.ad || "Misafir")}</td>
+      <td>${t.kategori === "sikayet" ? '<span class="etiket k">' + KATEGORI[t.kategori] + "</span>" : esc(KATEGORI[t.kategori] || t.kategori)}</td><td>${DURUM[t.durum] || esc(t.durum)}</td><td>${once(t.guncelleme)}</td></tr>`).join("") || '<tr><td colspan="6" class="soluk">Talep yok.</td></tr>'}
+    </tbody></table></div>`;
+  $("#d_filtre").value = destekFiltre; $("#d_filtre").onchange = () => { destekFiltre = $("#d_filtre").value; git("destek"); };
+  const tablo = {}; l.forEach(t => tablo[t.id] = t);
+  document.querySelectorAll("[data-t]").forEach(r => r.onclick = () => talepAc(tablo[r.dataset.t]));
+}
+async function talepAc(t){
+  const m = await rest("GET", `destek_mesajlari?talep=eq.${t.id}&select=id,yonetici,metin,zaman&order=id.asc`);
+  if (!t.yonetici_okudu) { rest("PATCH", `destek_talepleri?id=eq.${t.id}`, { yonetici_okudu: true }, { Prefer: "return=minimal" }).then(rozetler).catch(() => {}); t.yonetici_okudu = true; }
+  modal(`<h3>${esc(t.konu)} ${DURUM[t.durum] || ""}</h3>
+    <p class="soluk">${esc(t.ad || "Misafir")} · ${esc(KATEGORI[t.kategori] || t.kategori)} · açıldı ${tarih(t.olusturma)} · sürüm ${esc(t.surum || "—")}</p>
+    <div class="kart" style="max-height:48vh;overflow:auto" id="t_mesajlar">${m.map(x => `<div style="display:flex;justify-content:${x.yonetici ? "flex-end" : "flex-start"};margin:8px 0">
+      <div style="max-width:78%;background:${x.yonetici ? "#4a3010" : "#1c3350"};border:1px solid ${x.yonetici ? "#8a5a1e" : "#2e5a8a"};border-radius:12px;padding:8px 12px">
+      <div class="kucuk soluk">${x.yonetici ? "Destek Ekibi" : esc(t.ad || "Oyuncu")} · ${tarih(x.zaman)}</div><div style="white-space:pre-wrap;word-break:break-word">${esc(x.metin)}</div></div></div>`).join("")}</div>
+    ${t.durum === "kapali" ? '<p class="soluk">Bu talep kapalı. Cevap yazmak için önce yeniden aç.</p>' : `<textarea id="t_cevap" rows="4" maxlength="1000" style="width:100%" placeholder="Cevabını yaz..."></textarea>
+      <div class="arac" style="margin-top:8px"><button class="ana" id="t_gonder">Cevabı Gönder</button><button id="t_gonderkapat">Gönder ve Kapat</button></div>`}
+    <div class="arac" style="justify-content:space-between;margin-top:10px"><div class="arac" style="margin:0">
+      ${t.durum === "kapali" ? '<button class="yesil" id="t_ac">Yeniden Aç</button>' : '<button id="t_kapat">Talebi Kapat</button>'}
+      <button id="t_oyuncu">Oyuncuyu Aç</button><button class="tehlike" id="t_sil">Talebi Sil</button></div><button id="t_kpt">Kapat</button></div>`);
+  const kutu = $("#t_mesajlar"); kutu.scrollTop = kutu.scrollHeight;
+  const durumYap = d => rest("PATCH", `destek_talepleri?id=eq.${t.id}`, { durum: d }, { Prefer: "return=minimal" });
+  const gonder = async kapat => { const v = $("#t_cevap").value.trim(); if (!v) return bildir("Cevap yaz", true);
+    try { await rest("POST", "destek_mesajlari", { talep: t.id, metin: v }, { Prefer: "return=minimal" }); if (kapat) await durumYap("kapali");
+      bildir("Cevap gönderildi"); kapatModal(); git("destek"); rozetler(); } catch (e) { bildir(e.message, true); } };
+  if ($("#t_gonder")) { $("#t_gonder").onclick = () => gonder(false); $("#t_gonderkapat").onclick = () => gonder(true); }
+  if ($("#t_kapat")) $("#t_kapat").onclick = async () => { try { await durumYap("kapali"); kapatModal(); git("destek"); rozetler(); } catch (e) { bildir(e.message, true); } };
+  if ($("#t_ac")) $("#t_ac").onclick = async () => { try { await durumYap("acik"); t.durum = "acik"; talepAc(t); } catch (e) { bildir(e.message, true); } };
+  $("#t_oyuncu").onclick = () => oyuncuAc(t.oyuncu).catch(() => bildir("Bu oyuncunun profili yok (misafir).", true));
+  $("#t_sil").onclick = async () => { if (!confirm("Talep ve tüm mesajları silinsin mi?")) return; try { await rest("DELETE", `destek_talepleri?id=eq.${t.id}`, undefined, { Prefer: "return=minimal" }); kapatModal(); git("destek"); rozetler(); } catch (e) { bildir(e.message, true); } };
+  $("#t_kpt").onclick = kapatModal;
+}
+
+// ---------- yöneticiler ----------
+async function yoneticiler(){
+  const l = await rest("GET", "yoneticiler?select=id,eposta,rol,eklenme&order=eklenme.asc");
+  const sahip = oturum.rol === "sahip";
+  $("#icerik").innerHTML = `<h3>Yöneticiler</h3>
+    ${sahip ? `<div class="kart"><h4>Yeni yönetici ekle</h4>
+      <p class="soluk kucuk">1) Eklemek istediğin kişi bu panelin giriş ekranında <b>"Hesap oluştur"</b> ile kendi e-postası ve şifresiyle hesap açar (e-postasına gelen onay bağlantısına tıklar).<br>2) Sen o e-postayı aşağıya yazıp eklersin. Artık kendi şifresiyle panele girebilir.<br>Yöneticiler her şeyi yapabilir ama başka yönetici ekleyip çıkaramaz; bunu sadece sahip yapar.</p>
+      <div class="satir"><input id="y_eposta" type="email" placeholder="ornek@gmail.com"><button class="ana" id="y_ekle" style="flex:0 0 auto">Yönetici Yap</button></div></div>`
+    : '<p class="soluk">Yönetici ekleyip çıkarmayı sadece panelin sahibi yapabilir.</p>'}
+    <div class="kart" style="padding:0;overflow:auto"><table><thead><tr><th>E-posta</th><th>Rol</th><th>Eklenme</th><th></th></tr></thead><tbody>
+    ${l.map(y => `<tr><td>${esc(y.eposta || y.id)}${y.id === oturum.id ? ' <span class="soluk kucuk">(sen)</span>' : ""}</td><td>${y.rol === "sahip" ? '<span class="etiket s">Sahip</span>' : '<span class="etiket m">Yönetici</span>'}</td>
+      <td>${tarih(y.eklenme)}</td><td>${sahip && y.rol !== "sahip" ? `<button class="tehlike" data-c="${y.id}">Çıkar</button>` : ""}</td></tr>`).join("")}
+    </tbody></table></div>`;
+  if (sahip) {
+    $("#y_ekle").onclick = async () => { const e = $("#y_eposta").value.trim(); if (!e) return;
+      try { const r = await rpc("yonetim_yonetici_ekle", { e });
+        if (r === "hesap_yok") return bildir("Bu e-postayla hesap yok. Kişi önce panelin giriş ekranından 'Hesap oluştur' ile hesap açmalı.", true);
+        bildir(e + " artık yönetici"); git("yonetici"); } catch (x) { bildir(x.message, true); } };
+    document.querySelectorAll("[data-c]").forEach(b => b.onclick = async () => { if (!confirm("Bu kişinin yöneticiliği kaldırılsın mı?")) return;
+      try { await rpc("yonetim_yonetici_sil", { hedef: b.dataset.c }); bildir("Yönetici çıkarıldı"); git("yonetici"); } catch (x) { bildir(x.message, true); } });
+  }
+}
+
+// ---------- modal ----------
+function modal(html){ $("#modal_ic").innerHTML = html; $("#modal").style.display = "flex"; }
+function kapatModal(){ $("#modal").style.display = "none"; }
+$("#modal").onclick = e => { if (e.target.id === "modal") kapatModal(); };
+document.onkeydown = e => { if (e.key === "Escape") kapatModal(); };
+
+// ---------- başlat ----------
+$("#g_btn").onclick = girisYap;
+$("#g_sifre").onkeydown = e => { if (e.key === "Enter") girisYap(); };
+$("#cikis").onclick = cikisYap;
+if (oturum) yoneticiMi().then(basla).catch(() => cikisYap());
+</script>
+</body>
+</html>
