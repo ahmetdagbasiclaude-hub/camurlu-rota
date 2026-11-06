@@ -235,7 +235,7 @@ async function oyuncular(sadece){
     ${sadece === "suphe" ? '<p class="soluk">Oyun, puanı ya da elemesi normalden hızlı artan oyuncuları otomatik işaretler. İncele; hile ise banla, değilse şüpheyi temizle.</p>' : ""}
     ${sadece ? "" : `<div class="arac"><input id="ara" placeholder="Ad, e-posta veya oyuncu kimliği ara..." style="flex:1;max-width:420px" value="${esc(sonArama)}"><button class="ana" id="ara_btn">Ara</button>
       <select id="filtre"><option value="">Hepsi</option><option value="cevrimici">Çevrimiçi</option><option value="susturulan">Susturulan</option></select></div>`}
-    <div class="kart" style="padding:0;overflow:auto"><table><thead><tr><th>Oyuncu</th><th>Seviye</th><th>Tehlike puanı</th><th>Eleme</th><th>Reklam</th><th>Son görülme</th><th>Durum</th></tr></thead>
+    <div class="kart" style="padding:0;overflow:auto"><table><thead><tr><th>Oyuncu</th><th>Seviye</th><th>Tehlike puanı</th><th>Eleme</th><th>Mermi</th><th>Reklam</th><th>Son görülme</th><th>Durum</th></tr></thead>
     <tbody id="liste"></tbody></table></div>`;
   liste(l);
   if (!sadece) {
@@ -249,8 +249,8 @@ function liste(l){
   oyuncuOnbellek = {}; l.forEach(o => oyuncuOnbellek[o.id] = o);
   $("#liste").innerHTML = l.length ? l.map(o => `<tr class="tik" data-id="${o.id}">
     <td><b>${esc(o.ad)}</b>${o.google ? ' <span class="etiket m">Gmail</span>' : ""}<div class="soluk kucuk">${esc(o.eposta || "misafir")}</div></td>
-    <td>${o.seviye} <span class="soluk kucuk">${rutbe(o.seviye)}</span></td><td>${sayi(o.puan)}</td><td>${sayi(o.eleme)}</td><td>${sayi(o.reklam)}</td>
-    <td>${once(o.son_gorulme)}</td><td>${durumEtiket(o)}</td></tr>`).join("") : '<tr><td colspan="7" class="soluk">Kayıt yok.</td></tr>';
+    <td>${o.seviye} <span class="soluk kucuk">${rutbe(o.seviye)}</span></td><td>${sayi(o.puan)}</td><td>${sayi(o.eleme)}</td><td>${o.mermi == null ? '<span class="soluk">—</span>' : sayi(o.mermi)}</td><td>${sayi(o.reklam)}</td>
+    <td>${once(o.son_gorulme)}</td><td>${durumEtiket(o)}</td></tr>`).join("") : '<tr><td colspan="8" class="soluk">Kayıt yok.</td></tr>';
   document.querySelectorAll("#liste tr.tik").forEach(t => t.onclick = () => oyuncuAc(t.dataset.id));
 }
 function durumEtiket(o){
@@ -271,6 +271,7 @@ async function oyuncuAc(id){
       <div>Oyuncu kimliği</div><div class="kucuk">${esc(o.id)}</div>
       <div>Seviye / Rütbe</div><div>${o.seviye} · ${rutbe(o.seviye)}</div>
       <div>Tehlike puanı / Eleme</div><div>${sayi(o.puan)} / ${sayi(o.eleme)}</div>
+      <div>Mermi</div><div>${o.mermi == null ? "Henüz bilgi yok" : sayi(o.mermi)}</div>
       <div>İzlediği reklam</div><div>${sayi(o.reklam)}</div><div>Mesaj sayısı</div><div>${sayi(o.mesaj)}</div>
       <div>Oyun sürümü</div><div>${esc(o.surum || "—")}</div>
       <div>Hesap açılışı</div><div>${tarih(o.olusturma)}</div><div>Son görülme</div><div>${tarih(o.son_gorulme)} (${once(o.son_gorulme)})</div>
